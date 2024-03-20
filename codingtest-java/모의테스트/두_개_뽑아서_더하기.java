@@ -1,7 +1,7 @@
 import java.util.Arrays;
 import java.util.HashSet;
 
-public class Page113 {
+public class 두_개_뽑아서_더하기 {
     public static int[] solution(int[] numbers) {
         HashSet<Integer> hashSet = new HashSet<>();
         for (int i = 0; i < numbers.length; i++) {

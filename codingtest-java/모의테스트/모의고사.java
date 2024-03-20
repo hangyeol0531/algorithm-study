@@ -2,7 +2,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-public class Page116 {
+public class 모의고사 {
     public static int[] solution(int[] answers) {
 
         int[][] studentAnswer = {
