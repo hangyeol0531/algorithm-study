@@ -2,13 +2,12 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
-import java.util.Objects;
 
 public class 길_찾기_게임 {
-    private static int[] tree;
 
     public static class Node {
         int x, y, idx;
+        Node left, right;
 
         public Node(int x, int y, int idx) {
             this.x = x;
@@ -19,96 +18,67 @@ public class 길_찾기_게임 {
 
     // [x, y]
     public static int[][] solution(int[][] nodeinfo) {
-        int[][] answer = new int[2][nodeinfo[0].length];
-
-        int nodeCount = (int) Math.pow(2, nodeinfo.length) - 1;
-        tree = new int[nodeCount];
-
-        Node[] nodes = new Node[nodeinfo.length];
+        Node[] nodse = new Node[nodeinfo.length];
         for (int i = 0; i < nodeinfo.length; i++) {
-            nodes[i] = new Node(nodeinfo[i][0], nodeinfo[i][1], i);
+            nodse[i] = new Node(nodeinfo[i][0], nodeinfo[i][1], i + 1);
         }
 
-        Arrays.fill(tree, -1);
+        Node[] sortedNodes = Arrays.stream(nodse)
+            .sorted(Comparator.comparing((Node node) -> node.y).reversed()
+                .thenComparing((Node node) -> node.x))
+            .toArray(Node[]::new);
 
-        connect(0, nodes);
+        Node root = sortedNodes[0];
+        for (int i = 1; i < sortedNodes.length; i++) {
+            Node parent = root;
+            while (true) {
+                if (sortedNodes[i].x < parent.x) {
+                    if (parent.left == null) {
+                        parent.left = sortedNodes[i];
+                        break;
+                    } else {
+                        parent = parent.left;
+                    }
+                } else {
+                    if (parent.right == null) {
+                        parent.right = sortedNodes[i];
+                        break;
+                    } else {
+                        parent = parent.right;
+                    }
+                }
+            }
+        }
 
-        // 전위
+        int[][] answer = new int[2][nodeinfo[0].length];
+
         List<Integer> preOrderList = new ArrayList<>();
-        preOrder(0, nodeCount, preOrderList);
-        answer[0] = preOrderList.stream()
-            .mapToInt(v -> v)
-            .toArray();
+        preOrder(root, preOrderList);
+        answer[0] = preOrderList.stream().mapToInt(v -> v).toArray();
 
-        // 후위
         List<Integer> postOrderList = new ArrayList<>();
-        postorder(0, nodeCount, postOrderList);
-        answer[1] = postOrderList.stream()
-            .mapToInt(v -> v)
-            .toArray();
+        postOrder(root, postOrderList);
+        answer[1] = postOrderList.stream().mapToInt(v -> v).toArray();
+
         return answer;
     }
 
-    public static void preOrder(int idx, int nodeCount, List<Integer> preOrderList) {
-        if (idx >= nodeCount) {
+    public static void preOrder(Node node, List<Integer> preOrderList) {
+        if (node == null) {
             return;
         }
-
-        if (tree[idx] >= 0) {
-            preOrderList.add(tree[idx] + 1);
-        }
-        preOrder(idx * 2 + 1, nodeCount, preOrderList);
-        preOrder(idx * 2 + 2, nodeCount, preOrderList);
+        preOrderList.add(node.idx);
+        preOrder(node.left, preOrderList);
+        preOrder(node.right, preOrderList);
     }
 
-    public static void postorder(int idx, int nodeCount, List<Integer> postOrderList) {
-        if (idx >= nodeCount) {
+    public static void postOrder(Node node, List<Integer> postOrderList) {
+        if (node == null) {
             return;
         }
-        postorder(idx * 2 + 1, nodeCount, postOrderList);
-        postorder(idx * 2 + 2, nodeCount, postOrderList);
-        if (tree[idx] >= 0) {
-            postOrderList.add(tree[idx] + 1);
-        }
-    }
-
-    public static void connect(int idx, Node[] nodes) {
-        Node parent = Arrays.stream(nodes).sorted(Comparator.comparing((Node node) -> node.y).reversed()
-                .thenComparing((Node node) -> node.x))
-            .findFirst()
-            .orElse(null);
-
-        tree[idx] = parent.idx;
-
-        // 왼쪽
-        Node[] leftNodes = Arrays.stream(nodes)
-            .filter(node -> node.x < parent.x && node.y < parent.y)
-            .toArray(Node[]::new);
-
-        Node leftNode = Arrays.stream(leftNodes)
-            .findFirst()
-            .orElse(null);
-
-        int leftIdx = idx * 2 + 1;
-        if (Objects.nonNull(leftNode) && leftIdx < tree.length) {
-            tree[leftIdx] = leftNode.idx;
-            connect(leftIdx, leftNodes);
-        }
-
-        // 오른쪽
-        Node[] rightNodes = Arrays.stream(nodes)
-            .filter(node -> node.x > parent.x && node.y < parent.y)
-            .toArray(Node[]::new);
-
-        Node rightNode = Arrays.stream(rightNodes)
-            .findFirst()
-            .orElse(null);
-
-        int rightIdx = idx * 2 + 2;
-        if (Objects.nonNull(rightNode) && rightIdx < tree.length) {
-            tree[rightIdx] = rightNode.idx;
-            connect(rightIdx, rightNodes);
-        }
+        postOrder(node.left, postOrderList);
+        postOrder(node.right, postOrderList);
+        postOrderList.add(node.idx);
     }
 
     public static void main(String[] args) {
