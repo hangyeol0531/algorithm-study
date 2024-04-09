@@ -35,7 +35,7 @@ public class 섬_연결하기 {
         if (x == parent[x]) {
             return x;
         }
-        return parent[x] = find(parent[x]);
+        return find(parent[x]);
     }
 
 
