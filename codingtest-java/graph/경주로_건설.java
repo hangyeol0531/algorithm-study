@@ -23,6 +23,10 @@ public class 경주로_건설 {
         int xLen = board[0].length;
         int yLen = board.length;
 
+        /*
+        현재 위치로 값을 판단하면안되고,
+        코너, 직선에 따라 다음 값의 차이가 크기때문에, 방향에 따라 각각 값을 비교해야한다.
+        */
         isVisited = new int[yLen][xLen][4];
         for (int i = 0; i < yLen; i++) {
             for (int j = 0; j < xLen; j++) {
